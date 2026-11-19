@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zapp — your TV evening, sorted</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpath%20d='M34%2024%2023%207M66%2024%2077%207'%20stroke='%23ff7a59'%20stroke-width='8'%20stroke-linecap='round'/%3E%3Crect%20x='5'%20y='22'%20width='90'%20height='68'%20rx='20'%20fill='%23ff7a59'/%3E%3Cpath%20d='M58%2032%2037%2060h12l-6%2020%2022-31H53z'%20fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens: warm dark (default) ---------- */
+:root{
+  --bg:#17141f; --bg-2:#1d1927;
+  --panel:#252031; --panel-2:#2f2941;
+  --line:rgba(255,255,255,.10); --line-2:rgba(255,255,255,.20);
+  --text:#f7f3f0; --muted:#aaa2bc; --muted-2:#7d7493;
+  --accent:#ff7a59; --accent-soft:rgba(255,122,89,.16);
+  --sun:#ffc94d; --mint:#5fd8b4; --sky:#7cb8ff;
+  --glow-1:rgba(255,122,89,.16); --glow-2:rgba(124,184,255,.10);
+  --shadow:0 16px 40px -14px rgba(0,0,0,.6);
+  --r:18px; --r-sm:12px; --r-lg:24px;
+  --ui:"Nunito",system-ui,-apple-system,sans-serif;
+  --display:"Baloo 2","Nunito",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+/* ---------- tokens: warm light ---------- */
+[data-theme="light"]{
+  --bg:#fdf6f1; --bg-2:#fffcf9;
+  --panel:#ffffff; --panel-2:#fdf1e9;
+  --line:rgba(60,30,15,.11); --line-2:rgba(60,30,15,.2);
+  --text:#2c2334; --muted:#6c6179; --muted-2:#9b91a7;
+  --accent:#f2603c; --accent-soft:rgba(242,96,60,.12);
+  --sun:#e8a81f; --mint:#1fab86; --sky:#3b86d8;
+  --glow-1:rgba(255,160,120,.28); --glow-2:rgba(130,180,255,.18);
+  --shadow:0 14px 34px -14px rgba(90,50,30,.28);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1200px 620px at 10% -12%,var(--glow-1),transparent 62%),
+    radial-gradient(900px 520px at 92% -4%,var(--glow-2),transparent 58%),
+    var(--bg);
+  color:var(--text);font-family:var(--ui);font-size:15.5px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;min-height:100vh;transition:background-color .25s,color .25s;
+}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,select{font:inherit;color:inherit}
+a{color:var(--text)}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px;border-radius:8px}
+::selection{background:var(--accent-soft)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- header ---------- */
+header{
+  position:sticky;top:0;z-index:40;
+  background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:blur(16px) saturate(1.4);border-bottom:1px solid var(--line);
+}
+.bar{max-width:1340px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+/* ---------- logo ---------- */
+.logo{display:flex;align-items:center;gap:10px;white-space:nowrap;line-height:1}
+.logo .mark{
+  width:37px;height:37px;flex:0 0 37px;display:block;overflow:visible;
+  transform:rotate(-4deg);transition:transform .32s cubic-bezier(.2,.8,.3,1);
+  filter:drop-shadow(0 5px 12px var(--accent-soft))
+}
+.logo:hover .mark{transform:rotate(4deg) scale(1.07)}
+.logo .mark .s1{stop-color:var(--accent)}
+.logo .mark .s2{stop-color:var(--sun)}
+.logo .mark .bolt{transform-origin:50% 56%;transition:transform .32s cubic-bezier(.2,.8,.3,1)}
+.logo:hover .mark .bolt{transform:scale(1.12)}
+@keyframes zapin{0%{opacity:0;transform:scale(.4) rotate(-18deg)}60%{opacity:1;transform:scale(1.14) rotate(4deg)}100%{opacity:1;transform:none}}
+.logo .mark .bolt{animation:zapin .55s cubic-bezier(.2,.8,.3,1) both}
+.wordmark{
+  font-family:var(--display);font-weight:700;font-size:27px;letter-spacing:-.035em;
+  color:var(--accent);line-height:1.05
+}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .wordmark{
+    background:linear-gradient(100deg,var(--accent) 10%,var(--sun));
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;-webkit-text-fill-color:transparent
+  }
+}
+.logo small{font-family:var(--ui);font-size:11px;font-weight:700;color:var(--muted-2);letter-spacing:.03em;margin-left:1px;align-self:flex-end;padding-bottom:3px}
+@media(max-width:720px){.logo small{display:none}}
+nav{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);padding:5px;border-radius:999px}
+nav button{padding:8px 17px;border-radius:999px;font-size:14px;font-weight:600;color:var(--muted);transition:.18s}
+nav button:hover{color:var(--text);background:var(--panel-2)}
+nav button[aria-current="page"]{background:var(--accent);color:#fff;box-shadow:0 4px 12px var(--accent-soft)}
+nav .badge{display:inline-block;margin-left:7px;min-width:19px;padding:0 5px;border-radius:999px;background:rgba(255,255,255,.26);color:#fff;font-size:11.5px;font-weight:700}
+nav button:not([aria-current]) .badge{background:var(--accent);color:#fff}
+.spacer{flex:1 1 30px}
+.searchbox{position:relative;flex:1 1 380px;min-width:230px;max-width:500px}
+.searchbox input{
+  width:100%;padding:12px 40px 12px 42px;border-radius:999px;
+  background:var(--panel);border:1.5px solid var(--line-2);font-size:15px;font-weight:500;transition:.18s
+}
+.searchbox input::placeholder{color:var(--muted)}
+.searchbox input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 4px var(--accent-soft)}
+.searchbox input:focus~svg{stroke:var(--accent)}
+.searchbox svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:17px;height:17px;stroke:var(--muted);fill:none;stroke-width:2.2;transition:.18s}
+.searchbox kbd{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:10.5px;color:var(--muted-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;pointer-events:none}
+.searchbox input:not(:placeholder-shown)~kbd{display:none}
+#themeBtn{width:38px;height:38px;border-radius:50%;background:var(--panel);border:1px solid var(--line);font-size:16px;line-height:1;display:grid;place-items:center;transition:.18s}
+#themeBtn:hover{border-color:var(--accent);transform:rotate(-12deg)}
+
+/* ---------- hero search ---------- */
+.hsearch{position:relative;margin:0 0 26px}
+.hsearch input{
+  width:100%;padding:20px 160px 20px 60px;border-radius:var(--r-lg);
+  background:var(--panel);border:2px solid var(--line-2);
+  font-family:var(--display);font-size:21px;font-weight:600;letter-spacing:-.01em;transition:.2s;box-shadow:var(--shadow)
+}
+.hsearch input::placeholder{color:var(--muted-2);font-weight:500}
+.hsearch input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 5px var(--accent-soft),var(--shadow)}
+.hsearch svg{position:absolute;left:22px;top:50%;transform:translateY(-50%);width:23px;height:23px;stroke:var(--muted);fill:none;stroke-width:2.2;transition:.2s}
+.hsearch input:focus~svg{stroke:var(--accent)}
+.hsearch .hint{position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:var(--muted-2);pointer-events:none}
+.hsearch input:not(:placeholder-shown)~.hint{display:none}
+
+/* ---------- layout ---------- */
+main{max-width:1340px;margin:0 auto;padding:30px 22px 80px}
+.view[hidden]{display:none}
+.vhead{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-family:var(--display);font-size:clamp(26px,3.4vw,36px);font-weight:700;letter-spacing:-.025em;margin:0 0 3px;line-height:1.1}
+.sub{color:var(--muted);font-size:14.5px;margin:0;font-weight:500}
+.controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.ctl{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 14px;transition:.16s}
+.ctl:hover{border-color:var(--line-2)}
+.ctl label{font-size:12px;color:var(--muted-2);font-weight:700}
+.ctl select,.ctl input{background:none;border:0;font-size:14px;font-weight:600;outline:none;max-width:170px;cursor:pointer}
+.ctl select option{background:var(--panel)}
+.btn{padding:9px 15px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:14px;font-weight:600;transition:.18s}
+.btn:hover{background:var(--panel-2);border-color:var(--line-2);transform:translateY(-1px)}
+.btn.icon{padding:9px 13px;line-height:1}
+.btn.primary{background:var(--accent);border-color:transparent;color:#fff}
+.btn.primary:hover{filter:brightness(1.07)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;user-select:none;background:var(--panel);border:1px solid var(--line);padding:7px 14px;border-radius:999px}
+.toggle:hover{border-color:var(--line-2);color:var(--text)}
+.toggle input{accent-color:var(--accent);width:16px;height:16px;cursor:pointer}
+.secthead{display:flex;align-items:center;gap:11px;margin:0 0 15px;font-family:var(--display);font-size:20px;font-weight:600;letter-spacing:-.015em}
+.secthead .pill{font-family:var(--ui);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);background:var(--accent-soft);padding:4px 11px;border-radius:999px}
+.secthead .rule{flex:1;height:1px;background:var(--line)}
+
+/* ---------- tonight block ---------- */
+.tonight{margin:0 0 34px}
+.tngrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(258px,1fr);gap:15px}
+.tnhero{
+  position:relative;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line);
+  background:var(--panel);min-height:252px;display:flex;align-items:flex-end;gap:18px;padding:20px;box-shadow:var(--shadow)
+}
+.tnhero .bgimg{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center 20%;filter:saturate(1.15);opacity:.45;transform:scale(1.04)}
+.tnhero::after{content:"";position:absolute;inset:0;z-index:0;background:linear-gradient(0deg,var(--panel) 14%,color-mix(in srgb,var(--panel) 45%,transparent) 58%,transparent)}
+.tnhero .hitbox{position:absolute;inset:0;z-index:1;border-radius:inherit}
+.tnhero .hitbox:hover~.pos{transform:translateY(-3px) rotate(-1.5deg)}
+.tnhero .pos,.tnhero .tninfo,.tnhero .rank{position:relative;z-index:2;pointer-events:none}
+.tnhero .pos{width:106px;flex:0 0 106px;aspect-ratio:2/3;border-radius:14px;overflow:hidden;border:1.5px solid var(--line-2);box-shadow:var(--shadow);transition:.22s}
+.tnhero .pos img{width:100%;height:100%;object-fit:cover;display:block}
+.tninfo{flex:1 1 200px;min-width:0}
+.tninfo h3{font-family:var(--display);font-size:clamp(21px,2.7vw,29px);font-weight:700;letter-spacing:-.025em;line-height:1.12;margin:0 0 5px}
+.tninfo .epname{font-size:14.5px;color:var(--text);opacity:.86;font-weight:600;margin-bottom:9px}
+.rank{position:absolute;top:15px;left:15px;font-family:var(--display);font-weight:700;font-size:12.5px;padding:5px 12px;border-radius:999px;background:var(--accent);color:#fff;box-shadow:0 5px 14px rgba(0,0,0,.28)}
+.tnhero .star{top:13px;right:13px;left:auto;opacity:1;transform:none;z-index:3;width:36px;height:36px}
+.tnside{display:grid;gap:9px;align-content:start}
+.tncard{display:grid;grid-template-columns:24px 44px 1fr auto;gap:11px;align-items:center;padding:9px 12px;border-radius:var(--r);background:var(--panel);border:1px solid var(--line);width:100%;text-align:left;transition:.16s}
+.tncard:hover{background:var(--panel-2);border-color:var(--line-2);transform:translateX(3px)}
+.tncard .n{font-family:var(--display);font-weight:700;font-size:15px;color:var(--muted-2);text-align:center}
+.tncard .th{width:44px;aspect-ratio:2/3;border-radius:8px;overflow:hidden;background:var(--panel-2)}
+.tncard .th img{width:100%;height:100%;object-fit:cover;display:block}
+.tncard .tt{font-size:13.5px;font-weight:700;letter-spacing:-.01em;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tncard .ts{font-size:12px;color:var(--muted-2);font-weight:600;margin-top:1px}
+@media(max-width:880px){.tngrid{grid-template-columns:1fr}}
+
+/* ---------- show grid ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:24px 18px}
+.card{position:relative;text-align:left;width:100%;display:block}
+.poster{
+  position:relative;aspect-ratio:2/3;border-radius:var(--r);overflow:hidden;
+  background:linear-gradient(150deg,var(--panel-2),var(--panel));border:1px solid var(--line);
+  transition:transform .24s cubic-bezier(.2,.8,.3,1),box-shadow .24s,border-color .24s;width:100%
+}
+.poster img{width:100%;height:100%;object-fit:cover;display:block}
+.poster .ph{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-size:28px;font-weight:700;color:var(--muted-2)}
+.card:hover .poster{transform:translateY(-5px) rotate(-.6deg);box-shadow:var(--shadow);border-color:var(--accent)}
+.rating{
+  position:absolute;top:9px;right:9px;display:flex;align-items:center;gap:4px;
+  padding:4px 9px;border-radius:999px;background:color-mix(in srgb,var(--bg) 78%,transparent);
+  backdrop-filter:blur(8px);font-size:12px;font-weight:700;color:var(--sun)
+}
+.cmeta{margin-top:10px}
+.cname{font-size:14.5px;font-weight:700;letter-spacing:-.015em;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cline{margin-top:2px;font-size:12.5px;color:var(--muted-2);font-weight:600}
+.star{
+  position:absolute;top:8px;left:8px;width:32px;height:32px;border-radius:50%;
+  background:color-mix(in srgb,var(--bg) 78%,transparent);backdrop-filter:blur(8px);
+  display:grid;place-items:center;opacity:0;transform:scale(.8);transition:.18s;z-index:2
+}
+.card:hover .star,.star.on,.star:focus-visible{opacity:1;transform:scale(1)}
+.star svg{width:16px;height:16px;fill:none;stroke:var(--text);stroke-width:2}
+.star.on svg{fill:var(--sun);stroke:var(--sun)}
+.star:hover{background:var(--accent);transform:scale(1.12)}
+.star:hover svg{stroke:#fff}
+
+/* ---------- schedule ---------- */
+.slot{margin-bottom:26px}
+.slot h3{font-family:var(--display);font-size:15px;font-weight:600;color:var(--accent);margin:0 0 11px;display:flex;align-items:center;gap:12px}
+.slot h3::after{content:"";flex:1;height:1px;background:var(--line)}
+.rows{display:grid;gap:9px}
+.row{
+  display:grid;grid-template-columns:52px 60px 1fr auto;gap:15px;align-items:center;
+  padding:10px 14px;border-radius:var(--r);background:var(--panel);border:1px solid var(--line);
+  width:100%;text-align:left;transition:.16s;position:relative
+}
+.row:hover{background:var(--panel-2);border-color:var(--line-2);transform:translateX(3px)}
+.row .thumb{width:60px;aspect-ratio:2/3;border-radius:9px;overflow:hidden;background:var(--panel-2);border:1px solid var(--line)}
+.row .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.row .tm{font-family:var(--mono);font-size:13.5px;font-weight:500}
+.row .tm span{display:block;font-size:10.5px;color:var(--muted-2)}
+.rtitle{font-size:15px;font-weight:700;letter-spacing:-.015em}
+.rsub{font-size:13px;color:var(--muted);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-weight:500}
+.row .star{position:static;opacity:1;transform:none;background:var(--panel-2);border:1px solid var(--line)}
+
+/* ---------- chips ---------- */
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{padding:4px 11px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.chip.s{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.chip.sun{background:color-mix(in srgb,var(--sun) 16%,transparent);border-color:transparent;color:var(--sun)}
+.tag{font-size:11.5px;font-weight:700;letter-spacing:.02em;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted-2)}
+.tag.live{color:var(--mint);border-color:color-mix(in srgb,var(--mint) 40%,transparent);background:color-mix(in srgb,var(--mint) 12%,transparent)}
+.tag.end{color:var(--muted-2)}
+
+/* ---------- states ---------- */
+.empty{text-align:center;padding:64px 20px;color:var(--muted)}
+.empty .face{font-size:34px;margin-bottom:12px;opacity:.75}
+.empty .big{font-family:var(--display);font-size:21px;font-weight:600;color:var(--text);margin-bottom:6px;letter-spacing:-.02em}
+.empty .sg{margin-top:20px;display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+.empty .sg button{cursor:pointer}
+.err{border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);background:var(--accent-soft);color:var(--text);padding:15px 17px;border-radius:var(--r);font-size:14px;font-weight:600}
+.note{display:flex;gap:11px;align-items:center;flex-wrap:wrap;background:var(--panel);border:1.5px dashed var(--line-2);border-radius:var(--r);padding:13px 17px;margin:0 0 18px;font-size:13.5px;font-weight:600;color:var(--muted)}
+.note b{color:var(--text)}
+.note .icon{font-size:17px;line-height:1}
+.note button{padding:7px 13px;border-radius:999px;background:var(--accent);color:#fff;font-size:13px;font-weight:700;transition:.16s}
+.note button:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.note button.alt{background:var(--panel-2);color:var(--text);border:1px solid var(--line-2)}
+@keyframes shimmer{to{background-position:200% 0}}
+.sk{background:linear-gradient(100deg,var(--panel) 20%,var(--panel-2) 42%,var(--panel) 64%);background-size:220% 100%;animation:shimmer 1.3s linear infinite;border-radius:var(--r)}
+.sk.p{aspect-ratio:2/3}
+.sk.l{height:12px;border-radius:6px;margin-top:10px}
+.sk.r{height:88px;border-radius:var(--r)}
+
+/* ---------- virtual grid ---------- */
+.vgrid{position:relative;width:100%;min-height:200px}
+.vspacer{width:100%}
+.vwin{position:absolute;top:0;left:0;right:0}
+.vcard{position:absolute;top:0;left:0}
+.vcard .poster{border-radius:var(--r-sm)}
+.vcard .cname{font-size:13px;-webkit-line-clamp:2}
+.vcard .cline{font-size:11.5px}
+.note .prog{min-width:140px}
+
+/* ---------- detail sheet ---------- */
+.scrim{position:fixed;inset:0;z-index:60;background:color-mix(in srgb,var(--bg) 70%,transparent);backdrop-filter:blur(9px);display:grid;place-items:start center;padding:28px 18px;overflow-y:auto}
+.scrim[hidden]{display:none}
+@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+.sheet{width:100%;max-width:1060px;background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden;animation:rise .25s cubic-bezier(.2,.8,.3,1)}
+.hero{position:relative;padding:26px;display:flex;gap:24px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.hero .bgimg{position:absolute;inset:0;background-size:cover;background-position:center 18%;filter:blur(26px) saturate(1.5);opacity:.32;transform:scale(1.15)}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in srgb,var(--bg-2) 45%,transparent),var(--bg-2) 92%)}
+.hero>*{position:relative;z-index:1}
+.hero .pos{width:172px;flex:0 0 172px;aspect-ratio:2/3;border-radius:var(--r);overflow:hidden;background:var(--panel);border:1.5px solid var(--line-2);box-shadow:var(--shadow)}
+.hero .pos img{width:100%;height:100%;object-fit:cover;display:block}
+.hinfo{flex:1 1 320px;min-width:260px}
+.hinfo h2{font-family:var(--display);font-size:clamp(24px,3.4vw,34px);font-weight:700;letter-spacing:-.03em;margin:0 0 9px;line-height:1.1}
+.hmeta{display:flex;gap:9px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:13.5px;font-weight:600;margin-bottom:13px}
+.summary{color:var(--text);opacity:.82;font-size:14.5px;line-height:1.65;margin:15px 0 0;max-width:62ch}
+.hactions{display:flex;gap:9px;margin-top:18px;flex-wrap:wrap}
+.score{display:flex;align-items:baseline;gap:3px;color:var(--sun);font-weight:700}
+.score b{font-family:var(--display);font-size:22px}
+.score span{color:var(--muted-2);font-size:11.5px}
+.closex{position:absolute;top:15px;right:15px;z-index:3;width:36px;height:36px;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;font-size:17px;color:var(--muted)}
+.closex:hover{color:var(--text);border-color:var(--accent);transform:rotate(90deg)}
+.dtabs{display:flex;gap:4px;padding:11px 26px;border-bottom:1px solid var(--line);background:var(--bg-2);position:sticky;top:0;z-index:2}
+.dtabs button{padding:9px 16px;font-size:14px;font-weight:700;color:var(--muted);border-radius:999px}
+.dtabs button:hover{color:var(--text);background:var(--panel)}
+.dtabs button[aria-selected="true"]{color:#fff;background:var(--accent)}
+.dbody{padding:22px 26px 30px}
+.seasonbar{display:flex;gap:15px;align-items:center;flex-wrap:wrap;margin-bottom:17px}
+.prog{flex:1 1 180px;min-width:150px}
+.prog .track{height:7px;border-radius:99px;background:var(--panel-2);overflow:hidden;border:1px solid var(--line)}
+.prog .fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--sun));border-radius:99px;transition:width .3s}
+.prog .lbl{font-size:12px;font-weight:700;color:var(--muted-2);margin-top:6px}
+.eps{display:grid;gap:7px}
+.ep{display:grid;grid-template-columns:32px 64px 1fr auto;gap:13px;align-items:center;padding:10px 13px;border-radius:var(--r);border:1px solid var(--line);background:var(--panel);transition:.16s}
+.ep:hover{border-color:var(--line-2)}
+.ep.seen{opacity:.55}
+.ep .num{font-family:var(--display);font-size:13.5px;font-weight:700;color:var(--muted-2);text-align:right}
+.ep .date{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.ep .en{font-size:14.5px;font-weight:600;letter-spacing:-.01em}
+.ep .es{font-size:13px;color:var(--muted-2);margin-top:3px;display:none}
+.ep.open .es{display:block;max-width:70ch;line-height:1.6;color:var(--muted)}
+.ep .mid{text-align:left;width:100%}
+.ep .check{width:28px;height:28px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;color:transparent;font-size:14px;font-weight:700;flex:0 0 auto;transition:.16s}
+.ep .check:hover{border-color:var(--mint)}
+.ep.seen .check{background:var(--mint);border-color:var(--mint);color:var(--bg)}
+.ep .rt{font-size:12.5px;font-weight:700;color:var(--sun)}
+.epfoot{display:flex;gap:10px;align-items:center}
+.cast{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:10px}
+.person{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:var(--r);background:var(--panel);border:1px solid var(--line)}
+.av{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--accent),var(--sun))}
+.person .nm{font-size:14px;font-weight:700;line-height:1.25}
+.person .ch{font-size:12.5px;color:var(--muted-2);line-height:1.3;font-weight:600}
+
+/* ---------- watchlist ---------- */
+.wl{display:grid;gap:10px}
+.wrow{display:grid;grid-template-columns:60px 1fr auto auto;gap:16px;align-items:center;padding:12px 14px;border-radius:var(--r);background:var(--panel);border:1px solid var(--line);transition:.16s}
+.wrow:hover{border-color:var(--line-2);background:var(--panel-2);transform:translateX(3px)}
+.wrow .thumb{width:60px;aspect-ratio:2/3;border-radius:9px;overflow:hidden;background:var(--panel-2)}
+.wrow .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.next{text-align:right;font-size:13px}
+.next .cd{font-weight:700;color:var(--mint)}
+.next .soon{color:var(--accent)}
+.next .nx{display:block;color:var(--muted-2);font-size:12px;font-weight:600;padding:0;border:0;background:none}
+
+footer{max-width:1340px;margin:0 auto;padding:0 22px 40px;color:var(--muted-2);font-size:12.5px;font-weight:600;display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+footer a{color:var(--muted)}
+.meter{font-family:var(--mono);font-size:11.5px}
+
+@media(max-width:720px){
+  .bar{gap:11px;padding:12px 16px}
+  .searchbox{order:3;flex:1 1 100%}
+  main{padding:22px 16px 60px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(126px,1fr));gap:18px 13px}
+  .row{grid-template-columns:48px 46px 1fr;row-gap:9px}
+  .row .star{position:absolute;right:12px;top:12px}
+  .tnhero{min-height:0;flex-direction:column;align-items:flex-start}
+  .hero{padding:18px}
+  .hero .pos{width:116px;flex:0 0 116px}
+  .dbody,.dtabs{padding-left:16px;padding-right:16px}
+  .ep{grid-template-columns:28px 1fr auto}
+  .ep .date{display:none}
+  .wrow{grid-template-columns:50px 1fr auto}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="logo">
+      <svg class="mark" viewBox="0 0 100 100" role="img" aria-label="Zapp">
+        <defs>
+          <linearGradient id="zgrad" x1="0" y1="0" x2="1" y2="1">
+            <stop class="s1" offset="0"/><stop class="s2" offset="1"/>
+          </linearGradient>
+          <linearGradient id="zgloss" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff" stop-opacity=".22"/>
+            <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- antennae -->
+        <path d="M34 25 23 8M66 25 77 8" stroke="url(#zgrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+        <circle cx="23" cy="8" r="4.5" fill="url(#zgrad)"/>
+        <circle cx="77" cy="8" r="4.5" fill="url(#zgrad)"/>
+        <!-- screen -->
+        <rect x="5" y="22" width="90" height="68" rx="20" fill="url(#zgrad)"/>
+        <rect x="5" y="22" width="90" height="68" rx="20" fill="url(#zgloss)"/>
+        <!-- bolt -->
+        <path class="bolt" d="M58 32 37 60h12l-6 20 22-31H53z" fill="#fff"/>
+      </svg>
+      <span class="wordmark">Zapp</span>
+      <small>TV, sorted</small>
+    </div>
+    <nav id="nav" aria-label="Views">
+      <button data-view="today" aria-current="page">Tonight</button>
+      <button data-view="search">Search</button>
+      <button data-view="browse">Browse</button>
+      <button data-view="watchlist">My shows<span class="badge" id="wlCount" hidden>0</span></button>
+    </nav>
+    <div class="spacer"></div>
+    <div class="searchbox">
+      <label class="sr" for="q">Search shows</label>
+      <input id="q" type="search" placeholder="Search shows…" autocomplete="off" spellcheck="false">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.5-4.5"/></svg>
+      <kbd>/</kbd>
+    </div>
+    <button id="themeBtn" title="Switch light / dark" aria-label="Switch light or dark theme">☀</button>
+  </div>
+</header>
+
+<main>
+  <!-- TONIGHT -->
+  <section class="view" id="view-today">
+    <div class="vhead">
+      <div>
+        <h1 id="todayTitle">Good evening</h1>
+        <p class="sub" id="todaySub">Loading the schedule…</p>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label for="country">Country</label><select id="country"></select></div>
+        <div class="ctl"><label for="window">Window</label>
+          <select id="window">
+            <option value="evening" selected>Tonight (18:00+)</option>
+            <option value="prime">Prime time (20:00–23:00)</option>
+            <option value="all">Whole day</option>
+          </select>
+        </div>
+        <div class="ctl"><label for="channel">Channel</label><select id="channel"><option value="">All channels</option></select></div>
+        <div class="ctl"><label for="date">Date</label><input id="date" type="date"></div>
+        <button class="btn icon" id="dPrev" title="Previous day" aria-label="Previous day">←</button>
+        <button class="btn icon" id="dToday" title="Jump to today">Today</button>
+        <button class="btn icon" id="dNext" title="Next day" aria-label="Next day">→</button>
+        <label class="toggle"><input type="checkbox" id="incWeb">+ Streaming</label>
+        <label class="toggle" title="Also sweep TVmaze's complete schedule for entries the country endpoint drops"><input type="checkbox" id="deep">Deep check</label>
+        <label class="toggle"><input type="checkbox" id="onlyFollowed">My shows only</label>
+      </div>
+    </div>
+    <div id="tonightBlock"></div>
+    <div id="schedHead"></div>
+    <div id="todayBody"></div>
+  </section>
+
+  <!-- SEARCH -->
+  <section class="view" id="view-search" hidden>
+    <div class="hsearch">
+      <label class="sr" for="q2">Search shows</label>
+      <input id="q2" type="search" placeholder="Search every show on TVmaze…" autocomplete="off" spellcheck="false">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.5-4.5"/></svg>
+      <span class="hint">press / anywhere</span>
+    </div>
+    <div class="vhead">
+      <div>
+        <h1 id="searchTitle">Search</h1>
+        <p class="sub" id="searchSub">Find any show in the TVmaze database.</p>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label for="sort">Sort</label>
+          <select id="sort">
+            <option value="relevance">Relevance</option>
+            <option value="rating">Rating</option>
+            <option value="newest">Newest</option>
+            <option value="name">A–Z</option>
+          </select>
+        </div>
+        <div class="ctl"><label for="genre">Genre</label><select id="genre"><option value="">All</option></select></div>
+        <div class="ctl"><label for="network">Channel</label><select id="network"><option value="">All</option></select></div>
+      </div>
+    </div>
+    <div id="searchBody"></div>
+  </section>
+
+  <!-- BROWSE -->
+  <section class="view" id="view-browse" hidden>
+    <div class="vhead">
+      <div>
+        <h1>Browse everything</h1>
+        <p class="sub" id="browseSub">All 91,242 shows in TVmaze — virtual-scrolled.</p>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label for="bq">Search</label><input id="bq" type="search" placeholder="search all of TVmaze…" autocomplete="off" style="max-width:190px"></div>
+        <div class="ctl"><label for="bsort">Sort</label>
+          <select id="bsort">
+            <option value="popular">Popularity</option>
+            <option value="rating">Rating</option>
+            <option value="newest">Newest</option>
+            <option value="name">A–Z</option>
+          </select>
+        </div>
+        <div class="ctl"><label for="bgenre">Genre</label><select id="bgenre"><option value="">All</option></select></div>
+        <div class="ctl"><label for="blang">Language</label><select id="blang"><option value="">All</option></select></div>
+        <div class="ctl"><label for="bmin">Min ★</label>
+          <select id="bmin">
+            <option value="0">Any</option><option value="6">6+</option>
+            <option value="7">7+</option><option value="8">8+</option><option value="9">9+</option>
+          </select>
+        </div>
+        <label class="toggle"><input type="checkbox" id="bposter">With poster</label>
+      </div>
+    </div>
+    <div id="browseBar"></div>
+    <div id="browseNote"></div>
+    <div id="browseGrid" class="vgrid"><div class="vspacer"></div><div class="vwin"></div></div>
+  </section>
+
+  <!-- WATCHLIST -->
+  <section class="view" id="view-watchlist" hidden>
+    <div class="vhead">
+      <div>
+        <h1>My shows</h1>
+        <p class="sub" id="wlSub">Saved in this browser only — nothing leaves your machine.</p>
+      </div>
+      <div class="controls">
+        <button class="btn" id="wlCopy">Copy backup</button>
+        <button class="btn" id="wlPaste">Restore…</button>
+        <button class="btn" id="wlClear">Clear all</button>
+      </div>
+    </div>
+    <div id="wlBody"></div>
+  </section>
+</main>
+
+<footer>
+  <span>Zapp · data by <a href="https://www.tvmaze.com/api" target="_blank" rel="noopener">TVmaze</a> — free, no key needed. Poster art © its rights holders.</span>
+  <span class="meter" id="meter">0 calls · 0 cached</span>
+</footer>
+
+<div class="scrim" id="scrim" hidden role="dialog" aria-modal="true" aria-label="Show details">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   1. TVmaze transport: throttle + cache + 429 backoff
+   The API allows ~20 calls / 10s per IP, so we stay under it.
+   ============================================================ */
+const API = "https://api.tvmaze.com";
+const LIMIT = { max: 16, window: 10000, concurrency: 4 };
+const stats = { calls: 0, cached: 0 };
+const cache = new Map();
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+const limiter = {
+  stamps: [], queue: [], running: 0, timer: null,
+  run(fn) { return new Promise((resolve, reject) => { this.queue.push({ fn, resolve, reject }); this.pump(); }); },
+  pump() {
+    if (this.running >= LIMIT.concurrency || !this.queue.length) return;
+    const now = Date.now();
+    this.stamps = this.stamps.filter(t => now - t < LIMIT.window);
+    if (this.stamps.length >= LIMIT.max) {
+      const wait = LIMIT.window - (now - this.stamps[0]) + 60;
+      if (!this.timer) this.timer = setTimeout(() => { this.timer = null; this.pump(); }, wait);
+      return;
+    }
+    const job = this.queue.shift();
+    this.stamps.push(now); this.running++; stats.calls++; paintMeter();
+    Promise.resolve().then(job.fn).then(job.resolve, job.reject)
+      .finally(() => { this.running--; this.pump(); });
+    this.pump();
+  }
+};
+/* Uncached fetch. Used by the full-index sync: caching 383 pages of
+   full show records would pin ~135 MB in memory for nothing. */
+function request(path, attempt = 0) {
+  return limiter.run(async () => {
+    const res = await fetch(API + path, { headers: { Accept: "application/json" } });
+    if (res.status === 429) {
+      if (attempt < 3) { await sleep(1200 * (attempt + 1)); return request(path, attempt + 1); }
+      throw new Error("TVmaze is rate-limiting this IP. Give it ten seconds and try again.");
+    }
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error("TVmaze replied " + res.status + ".");
+    return res.json();
+  });
+}
+function get(path) {
+  if (cache.has(path)) { stats.cached++; paintMeter(); return cache.get(path); }
+  const p = request(path);
+  cache.set(path, p);
+  p.catch(() => cache.delete(path));
+  return p;
+}
+function paintMeter() {
+  const el = document.getElementById("meter");
+  if (el) el.textContent = `${stats.calls} calls · ${stats.cached} cached`;
+}
+
+/* ============================================================
+   2. Local state
+   ============================================================ */
+const store = {
+  read(key, fallback) {
+    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+    catch (e) { return fallback; }
+  },
+  write(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (e) { return false; }
+  }
+};
+/* Carry over data saved under the old name. */
+try {
+  [["zapp.watchlist", "tvmaze.watchlist"], ["zapp.watched", "tvmaze.watched"]]
+    .forEach(([nu, old]) => {
+      if (localStorage.getItem(nu) === null && localStorage.getItem(old) !== null)
+        localStorage.setItem(nu, localStorage.getItem(old));
+    });
+} catch (e) { /* storage unavailable — carry on without it */ }
+
+let watchlist = store.read("zapp.watchlist", {});
+let watched   = store.read("zapp.watched", {});
+
+const isFollowed = id => !!watchlist[id];
+function toggleFollow(show) {
+  const id = String(show.id);
+  if (watchlist[id]) delete watchlist[id];
+  else watchlist[id] = {
+    id: show.id, name: show.name,
+    image: show.image ? (show.image.medium || show.image.original) : null,
+    premiered: show.premiered || null, status: show.status || null
+  };
+  store.write("zapp.watchlist", watchlist);
+  syncStars(); paintWlCount();
+  if (currentView === "watchlist") renderWatchlist();
+  if (currentView === "today") applyTodayFilter();
+}
+function isSeen(showId, epId) { return (watched[showId] || []).includes(epId); }
+function toggleSeen(showId, epId) {
+  const list = watched[showId] || [];
+  const i = list.indexOf(epId);
+  if (i === -1) list.push(epId); else list.splice(i, 1);
+  watched[showId] = list;
+  store.write("zapp.watched", watched);
+}
+function paintWlCount() {
+  const n = Object.keys(watchlist).length;
+  const b = document.getElementById("wlCount");
+  b.textContent = n; b.hidden = n === 0;
+}
+function syncStars() {
+  document.querySelectorAll("[data-star]").forEach(btn => {
+    const on = isFollowed(btn.dataset.star);
+    btn.classList.toggle("on", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.title = on ? "Remove from my shows" : "Add to my shows";
+  });
+}
+
+/* ============================================================
+   3. Helpers
+   ============================================================ */
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function plain(html) {
+  if (!html) return "";
+  const d = document.createElement("div"); d.innerHTML = html;
+  return (d.textContent || "").replace(/\s+/g, " ").trim();
+}
+const year = s => (s ? String(s).slice(0, 4) : "");
+const rate = s => (s && s.rating && s.rating.average ? s.rating.average.toFixed(1) : null);
+const netOf = s => (s.network && s.network.name) || (s.webChannel && s.webChannel.name) || "";
+const initials = n => String(n || "?").split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase();
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const epCode = e => (e.season ? `S${String(e.season).padStart(2, "0")}E${String(e.number || 0).padStart(2, "0")}` : "Special");
+function hhmm(t) {
+  if (!t) return "TBA";
+  const [h, m] = t.split(":").map(Number);
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr + "T00:00:00"), t = new Date();
+  return Math.round((d - new Date(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000);
+}
+function countdown(n) {
+  if (n === null) return "";
+  if (n < 0) return "aired";
+  if (n === 0) return "tonight";
+  if (n === 1) return "tomorrow";
+  if (n < 7) return `in ${n} days`;
+  if (n < 30) return `in ${Math.round(n / 7)} wk`;
+  return `in ${Math.round(n / 30)} mo`;
+}
+function greeting() {
+  const h = new Date().getHours();
+  return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+}
+const STAR_SVG = '<svg viewBox="0 0 24 24"><path d="M12 3.6l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8L3.6 9.7l5.8-.8z" stroke-linejoin="round"/></svg>';
+function starBtn(show) {
+  return `<button class="star${isFollowed(show.id) ? " on" : ""}" data-star="${show.id}"
+    data-show='${esc(JSON.stringify({ id: show.id, name: show.name, image: show.image, premiered: show.premiered, status: show.status }))}'
+    aria-pressed="${isFollowed(show.id)}" title="Add to my shows">${STAR_SVG}</button>`;
+}
+function statusTag(s) {
+  if (!s.status) return "";
+  const cls = s.status === "Running" ? "live" : s.status === "Ended" ? "end" : "";
+  return `<span class="tag ${cls}">${esc(s.status)}</span>`;
+}
+function showCard(show) {
+  const img = show.image && (show.image.medium || show.image.original);
+  const r = rate(show);
+  return `<div class="card">
+    ${starBtn(show)}
+    <button class="poster" data-show-id="${show.id}" aria-label="Open ${esc(show.name)}">
+      ${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : `<span class="ph">${esc(initials(show.name))}</span>`}
+      ${r ? `<span class="rating">★ ${r}</span>` : ""}
+    </button>
+    <div class="cmeta">
+      <div class="cname">${esc(show.name)}</div>
+      <div class="cline">${year(show.premiered) || "—"}${netOf(show) ? ` · ${esc(netOf(show))}` : ""}</div>
+    </div>
+  </div>`;
+}
+const skeletonGrid = (n = 12) => `<div class="grid">${Array.from({ length: n }, () =>
+  `<div><div class="sk p"></div><div class="sk l" style="width:80%"></div><div class="sk l" style="width:45%"></div></div>`).join("")}</div>`;
+const skeletonRows = (n = 7) => `<div class="rows">${Array.from({ length: n }, () => `<div class="sk r"></div>`).join("")}</div>`;
+const errBox = e => `<div class="err">${esc(e.message || String(e))}</div>`;
+function emptyBox(title, note, suggestions, face = "📺") {
+  return `<div class="empty"><div class="face">${face}</div><div class="big">${esc(title)}</div><div>${esc(note)}</div>
+    ${suggestions ? `<div class="sg">${suggestions.map(s => `<button class="chip s" data-suggest="${esc(s)}">${esc(s)}</button>`).join("")}</div>` : ""}</div>`;
+}
+
+/* ============================================================
+   4. Views
+   ============================================================ */
+let currentView = "today";
+function go(view) {
+  currentView = view;
+  document.querySelectorAll(".view").forEach(v => v.hidden = v.id !== "view-" + view);
+  document.querySelectorAll("#nav button").forEach(b =>
+    b.dataset.view === view ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current"));
+  if (location.hash.slice(1) !== view) history.replaceState(null, "", "#" + view);
+  if (view === "watchlist") renderWatchlist();
+  if (view === "browse") openBrowse();
+  if (view === "today" && !todayLoaded) loadSchedule();
+}
+
+/* ---- Tonight / schedule ---- */
+/* US and GB first: that's where TVmaze's national listings are densest. */
+const COUNTRIES = [["US","United States"],["GB","United Kingdom"],["AU","Australia"],["CA","Canada"],["IE","Ireland"],
+["DE","Germany"],["AT","Austria"],["CH","Switzerland"],["NL","Netherlands"],["BE","Belgium"],["FR","France"],
+["ES","Spain"],["IT","Italy"],["PT","Portugal"],["PL","Poland"],["CZ","Czechia"],["SE","Sweden"],["NO","Norway"],
+["DK","Denmark"],["FI","Finland"],["NZ","New Zealand"],["BR","Brazil"],["MX","Mexico"],["AR","Argentina"],
+["JP","Japan"],["KR","South Korea"],["IN","India"],["ZA","South Africa"]];
+const DEFAULT_COUNTRY = "US";
+let todayLoaded = false, scheduleData = [], broadcastCount = 0;
+
+function countryLabel() {
+  const sel = document.getElementById("country");
+  const opt = sel.options[sel.selectedIndex];
+  return opt ? opt.textContent : "";
+}
+function initToday() {
+  const sel = document.getElementById("country");
+  sel.innerHTML = COUNTRIES.map(([c, n]) => `<option value="${c}">${esc(n)}</option>`).join("")
+    + `<option value="">Web / streaming (global)</option>`;
+  sel.value = DEFAULT_COUNTRY;              // always opens on the US, whatever was picked last time
+  document.getElementById("date").value = iso(new Date());
+  sel.addEventListener("change", () => {
+    /* Anywhere but the US needs every source it can get, so switch the deep check
+       on when you leave the default and off when you come back to it. */
+    document.getElementById("deep").checked = !!(sel.value && sel.value !== DEFAULT_COUNTRY);
+    loadSchedule();
+  });
+  document.getElementById("date").addEventListener("change", loadSchedule);
+  document.getElementById("dPrev").addEventListener("click", () => shiftDay(-1));
+  document.getElementById("dNext").addEventListener("click", () => shiftDay(1));
+  document.getElementById("dToday").addEventListener("click", () => {
+    document.getElementById("date").value = iso(new Date()); loadSchedule();
+  });
+  document.getElementById("onlyFollowed").addEventListener("change", applyTodayFilter);
+  document.getElementById("channel").addEventListener("change", applyTodayFilter);
+  document.getElementById("window").addEventListener("change", applyTodayFilter);
+  document.getElementById("incWeb").addEventListener("change", loadSchedule);
+  document.getElementById("deep").addEventListener("change", loadSchedule);
+}
+function shiftDay(n) {
+  const i = document.getElementById("date");
+  const d = new Date(i.value + "T12:00:00"); d.setDate(d.getDate() + n);
+  i.value = iso(d); loadSchedule();
+}
+/* Channels come from whatever is actually on that day's schedule. */
+function populateChannels() {
+  const sel = document.getElementById("channel");
+  const names = [...new Set(scheduleData
+    .map(it => { const s = it.show || (it._embedded && it._embedded.show); return s ? netOf(s) : ""; })
+    .filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const keep = sel.value;
+  sel.innerHTML = `<option value="">All channels</option>` + names.map(n => `<option>${esc(n)}</option>`).join("");
+  sel.value = names.includes(keep) ? keep : "";
+}
+async function loadSchedule() {
+  todayLoaded = true;
+  const body = document.getElementById("todayBody");
+  const country = document.getElementById("country").value;
+  const date = document.getElementById("date").value || iso(new Date());
+  const web = country === "";
+  const isToday = date === iso(new Date());
+  document.getElementById("todayTitle").textContent = isToday
+    ? greeting()
+    : new Date(date + "T12:00:00").toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+  document.getElementById("todaySub").textContent = "Loading the schedule…";
+  document.getElementById("tonightBlock").innerHTML = "";
+  document.getElementById("schedHead").innerHTML = "";
+  body.innerHTML = skeletonRows();
+  try {
+    /* Broadcast and streaming live on different endpoints. For a country we
+       merge its own channels, its local web services, and the global ones. */
+    const incWeb = document.getElementById("incWeb").checked;
+    const jobs = web
+      ? [get(`/schedule/web?date=${date}`)]
+      : [get(`/schedule?country=${country}&date=${date}`)].concat(incWeb
+        ? [get(`/schedule/web?country=${country}&date=${date}`), get(`/schedule/web?country=&date=${date}`)] : []);
+    const parts = await Promise.all(jobs.map(j => j.catch(() => [])));
+    broadcastCount = Array.isArray(parts[0]) ? parts[0].length : 0;
+    localWebCount = web ? 0 : (Array.isArray(parts[1]) ? parts[1].length : 0);
+    globalWebCount = web ? 0 : (Array.isArray(parts[2]) ? parts[2].length : 0);
+    const seen = new Set();
+    scheduleData = [];
+    for (const arr of parts) for (const it of (arr || [])) {
+      if (it && it.id != null && !seen.has(it.id)) { seen.add(it.id); scheduleData.push(it); }
+    }
+
+    /* Deep check: sweep the full schedule for anything these endpoints missed. */
+    deepExtra = 0;
+    if (document.getElementById("deep").checked && !web) {
+      if (!fullSched) document.getElementById("todaySub").textContent =
+        "Fetching TVmaze's complete schedule (~11 MB, once a day)…";
+      const full = await ensureFullSchedule();
+      for (const e of (full || [])) {
+        if (e.airdate !== date || seen.has(e.id)) continue;
+        if (entryCountry(e.show) !== country) continue;
+        if (!incWeb && !e.show.network && e.show.webChannel) continue;   // streaming excluded
+        seen.add(e.id); scheduleData.push(e); deepExtra++;
+      }
+    }
+    populateChannels();
+    applyTodayFilter();
+  } catch (e) {
+    document.getElementById("todaySub").textContent = "Couldn't load the schedule.";
+    body.innerHTML = errBox(e);
+  }
+}
+function applyTodayFilter() {
+  const body = document.getElementById("todayBody");
+  const onlyF = document.getElementById("onlyFollowed").checked;
+  const channel = document.getElementById("channel").value;
+  const date = document.getElementById("date").value;
+  const isToday = date === iso(new Date());
+
+  const win = document.getElementById("window").value;
+  const WIN_LABEL = { evening: isToday ? "tonight" : "that evening", prime: "in prime time", all: isToday ? "today" : "that day" };
+  /* Airtimes are local to the broadcasting network, which is what you want here. */
+  const inWindow = x => {
+    if (win === "all") return true;
+    const t = x.ep.airtime;
+    if (!t) return false;                       // "time to be announced" has no window
+    return win === "prime" ? (t >= "20:00" && t < "23:00") : t >= "18:00";
+  };
+
+  let items = scheduleData.filter(it => it && (it.show || it._embedded && it._embedded.show))
+    .map(it => ({ ep: it, show: it.show || (it._embedded && it._embedded.show) }));
+  const total = items.length;
+  if (channel) items = items.filter(x => netOf(x.show) === channel);
+  if (onlyF) items = items.filter(x => isFollowed(x.show.id));
+  const beforeWindow = items.length;
+  items = items.filter(inWindow);
+
+  const bits = [`${items.length} ${items.length === 1 ? "programme" : "programmes"} ${WIN_LABEL[win]}`];
+  if (countryLabel()) bits.push(`in ${countryLabel()}`);
+  if (document.getElementById("incWeb").checked && document.getElementById("country").value !== "") bits.push("incl. streaming");
+  if (channel) bits.push(`on ${channel}`);
+  if (onlyF) bits.push("from my shows");
+  if (win !== "all") bits.push(`${beforeWindow} across the whole day`);
+  document.getElementById("todaySub").textContent = bits.join(" · ");
+
+  renderTonight(items, WIN_LABEL[win]);
+
+  /* TVmaze's national listings are dense for the US and UK and sparse elsewhere.
+     Say so plainly instead of letting the page look broken. */
+  const country = document.getElementById("country").value;
+  const thin = !channel && !onlyF && country !== "" && country !== DEFAULT_COUNTRY && broadcastCount <= 5;
+  const note = thin ? `<div class="note"><span class="icon">📡</span>
+    <span>TVmaze lists <b>${broadcastCount === 0 ? "nothing" : broadcastCount + (broadcastCount === 1 ? " programme" : " programmes")}</b>
+    on ${esc(countryLabel())} channels for this date — its national schedules are thin outside the US and UK.</span>
+    <button data-setcountry="${DEFAULT_COUNTRY}">Show United States</button>
+    <button class="alt" data-setcountry="">Show streaming</button></div>` : "";
+
+  let sources = "";
+  if (document.getElementById("deep").checked && country !== "") {
+    const sb = [`<b>${broadcastCount}</b> on ${esc(countryLabel())} channels`];
+    if (localWebCount) sb.push(`<b>${localWebCount}</b> ${esc(countryLabel())} streaming`);
+    if (globalWebCount) sb.push(`<b>${globalWebCount}</b> global streaming`);
+    sb.push(deepExtra ? `<b>${deepExtra}</b> found only in the complete schedule`
+                      : `<b>0</b> extra in the complete schedule`);
+    if (!document.getElementById("incWeb").checked) sb.push("streaming excluded");
+    sources = `<div class="note"><span class="icon">🛰️</span>
+      <span>All sources checked for ${esc(countryLabel())} on this date: ${sb.join(" · ")}.
+      ${fullError ? esc(fullError) : fullAt ? `Complete schedule cached ${esc(fullAt)}.` : ""}</span></div>`;
+  }
+
+  if (!items.length) {
+    const windowOnly = win !== "all" && beforeWindow > 0;
+    document.getElementById("schedHead").innerHTML = note + sources + (windowOnly
+      ? `<div class="note"><span class="icon">🌙</span><span>Nothing in that time window, but
+         <b>${beforeWindow}</b> ${beforeWindow === 1 ? "programme airs" : "programmes air"} earlier in the day.</span>
+         <button data-setwindow="all">Show whole day</button></div>` : "");
+    const filtered = channel || onlyF;
+    body.innerHTML = windowOnly ? "" : emptyBox(
+      filtered ? "Nothing matches those filters" : "No listings for this date",
+      filtered
+        ? `Nothing ${onlyF ? "from your shows " : ""}${channel ? "on " + channel + " " : ""}here — try All channels or another day.`
+        : "Try another country or a different date.",
+      null, filtered ? "🔍" : "📭");
+    return;
+  }
+  const headTitle = win === "all" ? "Full schedule"
+    : `Everything ${WIN_LABEL[win]}${countryLabel() ? " in " + countryLabel() : ""}`;
+  document.getElementById("schedHead").innerHTML = note + sources +
+    `<h2 class="secthead">${esc(headTitle)}<span class="pill">${items.length}</span>
+     ${win !== "all" ? `<button class="btn" data-setwindow="all" style="padding:5px 12px;font-size:12.5px">Whole day (${beforeWindow})</button>` : ""}
+     <span class="rule"></span></h2>`;
+
+  const slots = new Map();
+  items.sort((a, b) => String(a.ep.airtime || "zz").localeCompare(String(b.ep.airtime || "zz")));
+  for (const x of items) {
+    const key = x.ep.airtime || "TBA";
+    if (!slots.has(key)) slots.set(key, []);
+    slots.get(key).push(x);
+  }
+  let html = "";
+  for (const [time, list] of slots) {
+    html += `<div class="slot"><h3>${time === "TBA" ? "Time to be announced" : hhmm(time)}</h3><div class="rows">`;
+    for (const { ep, show } of list) {
+      const img = show.image && (show.image.medium || show.image.original);
+      html += `<div class="row">
+        <div class="tm">${hhmm(ep.airtime)}</div>
+        <button class="thumb" data-show-id="${show.id}" aria-label="Open ${esc(show.name)}">
+          ${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : ""}</button>
+        <button class="mid" style="text-align:left;width:100%" data-show-id="${show.id}">
+          <div class="rtitle">${esc(show.name)}</div>
+          <div class="rsub"><span class="tag">${epCode(ep)}</span>${!show.network && show.webChannel ? `<span class="tag live">stream</span>` : ""}${ep.name ? esc(ep.name) : ""}
+            ${netOf(show) ? `<span class="chip">${esc(netOf(show))}</span>` : ""}
+            ${rate(show) ? `<span class="chip sun">★ ${rate(show)}</span>` : ""}</div>
+        </button>
+        ${starBtn(show)}
+      </div>`;
+    }
+    html += `</div></div>`;
+  }
+  body.innerHTML = html;
+  syncStars();
+}
+
+/* ============================================================
+   Deep check: /schedule/full holds every future episode TVmaze knows,
+   including the TBA-airtime ones that /schedule?country= silently drops.
+   It's ~11 MB, so we fetch it once a day and keep it in IndexedDB.
+   ============================================================ */
+let fullSched = null, fullAt = null, fullLoading = false, fullError = "";
+let localWebCount = 0, globalWebCount = 0, deepExtra = 0;
+
+const entryCountry = s => (s.network && s.network.country && s.network.country.code)
+  || (s.webChannel && s.webChannel.country && s.webChannel.country.code) || null;
+/* Drop summaries, links and externals: cuts the payload we keep by roughly two thirds. */
+function trimEntry(e) {
+  const s = (e._embedded && e._embedded.show) || e.show;
+  if (!s) return null;
+  return {
+    id: e.id, name: e.name, season: e.season, number: e.number, airdate: e.airdate, airtime: e.airtime,
+    show: {
+      id: s.id, name: s.name, url: s.url, status: s.status || null, premiered: s.premiered || null,
+      language: s.language || null, runtime: s.runtime || null, averageRuntime: s.averageRuntime || null,
+      genres: s.genres || [], rating: s.rating || null, externals: s.externals || null,
+      officialSite: s.officialSite || null,
+      image: s.image ? { medium: s.image.medium, original: s.image.original } : null,
+      network: s.network ? { name: s.network.name, country: s.network.country ? { code: s.network.country.code } : null } : null,
+      webChannel: s.webChannel ? { name: s.webChannel.name, country: s.webChannel.country ? { code: s.webChannel.country.code } : null } : null
+    }
+  };
+}
+async function ensureFullSchedule(force) {
+  if (fullSched && !force) return fullSched;
+  if (fullLoading) return fullSched;
+  fullLoading = true; fullError = "";
+  const today = iso(new Date());
+  try {
+    if (!force) {
+      const cached = await idbGet("fullschedule");
+      if (cached && cached.at === today && Array.isArray(cached.list) && cached.list.length) {
+        fullSched = cached.list; fullAt = cached.at; fullLoading = false; return fullSched;
+      }
+    }
+    const raw = await request("/schedule/full");
+    fullSched = (raw || []).map(trimEntry).filter(Boolean);
+    fullAt = today;
+    await idbPut("fullschedule", { at: fullAt, list: fullSched });
+  } catch (e) {
+    fullError = e.message || "Couldn't fetch the full schedule.";
+  }
+  fullLoading = false;
+  return fullSched;
+}
+
+/* ---- Top picks: the best-rated things inside the chosen window ---- */
+function renderTonight(items, when) {
+  const wrap = document.getElementById("tonightBlock");
+  const pool = items.filter(x => x.show.rating && x.show.rating.average)
+    .slice().sort((a, b) => {
+      const d = b.show.rating.average - a.show.rating.average;
+      if (d) return d;
+      return String(a.ep.airtime || "").localeCompare(String(b.ep.airtime || ""));
+    });
+  if (!pool.length) { wrap.innerHTML = ""; return; }
+
+  const picks = pool.slice(0, 5);
+  const [top, ...rest] = picks;
+  const where = countryLabel() ? ` in ${countryLabel()}` : "";
+  const img = top.show.image && (top.show.image.original || top.show.image.medium);
+
+  wrap.innerHTML = `<section class="tonight">
+    <h2 class="secthead">Top picks ${esc(when)}${esc(where)}<span class="pill">best ${picks.length} of ${pool.length} rated</span><span class="rule"></span></h2>
+    <div class="tngrid">
+      <div class="tnhero">
+        ${img ? `<div class="bgimg" style="background-image:url('${esc(img)}')"></div>` : ""}
+        <button class="hitbox" data-show-id="${top.show.id}" aria-label="Open ${esc(top.show.name)}"></button>
+        <span class="rank">#1 ${esc(when)}</span>
+        ${starBtn(top.show)}
+        <div class="pos">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : ""}</div>
+        <div class="tninfo">
+          <h3>${esc(top.show.name)}</h3>
+          <div class="epname">${esc(epCode(top.ep))}${top.ep.name ? " · " + esc(top.ep.name) : ""}</div>
+          <div class="chips">
+            <span class="chip sun">★ ${rate(top.show)}</span>
+            <span class="chip s">${esc(hhmm(top.ep.airtime))}</span>
+            ${netOf(top.show) ? `<span class="chip">${esc(netOf(top.show))}</span>` : ""}
+            ${(top.show.genres || []).slice(0, 2).map(g => `<span class="chip">${esc(g)}</span>`).join("")}
+          </div>
+        </div>
+      </div>
+      <div class="tnside">${rest.map((x, i) => {
+        const th = x.show.image && (x.show.image.medium || x.show.image.original);
+        return `<button class="tncard" data-show-id="${x.show.id}">
+          <span class="n">${i + 2}</span>
+          <span class="th">${th ? `<img src="${esc(th)}" alt="" loading="lazy">` : ""}</span>
+          <span>
+            <span class="tt">${esc(x.show.name)}</span>
+            <span class="ts">${esc(hhmm(x.ep.airtime))}${netOf(x.show) ? " · " + esc(netOf(x.show)) : ""}</span>
+          </span>
+          <span class="chip sun">★ ${rate(x.show)}</span>
+        </button>`;
+      }).join("")}</div>
+    </div>
+  </section>`;
+}
+
+/* ---- Search ---- */
+let searchResults = [], searchSeq = 0;
+const searchInputs = () => [document.getElementById("q"), document.getElementById("q2")];
+function setQuery(v) { searchInputs().forEach(i => { if (i) i.value = v; }); }
+function initSearch() {
+  let t;
+  searchInputs().forEach(input => {
+    input.addEventListener("input", () => {
+      clearTimeout(t);
+      const v = input.value;
+      searchInputs().forEach(o => { if (o !== input) o.value = v; });
+      if (currentView !== "search") go("search");
+      if (!v.trim()) { searchResults = []; renderSearchEmpty(); return; }
+      t = setTimeout(() => runSearch(v.trim()), 320);
+    });
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") { clearTimeout(t); setQuery(input.value); runSearch(input.value.trim()); }
+      if (e.key === "Escape") { setQuery(""); searchResults = []; renderSearchEmpty(); }
+    });
+  });
+  ["sort", "genre", "network"].forEach(id =>
+    document.getElementById(id).addEventListener("change", paintSearch));
+  renderSearchEmpty();
+}
+function renderSearchEmpty() {
+  document.getElementById("searchTitle").textContent = "Search";
+  document.getElementById("searchSub").textContent = "Find any show in the TVmaze database.";
+  document.getElementById("searchBody").innerHTML = emptyBox(
+    "What are you in the mood for?",
+    "Search by title — TVmaze fuzzy-matches, so partial names work.",
+    ["Dark", "Babylon Berlin", "Severance", "Tatort", "The Bear", "Shogun"], "🍿");
+}
+async function runSearch(q) {
+  if (!q) return renderSearchEmpty();
+  const seq = ++searchSeq;
+  const body = document.getElementById("searchBody");
+  document.getElementById("searchTitle").textContent = `“${q}”`;
+  body.innerHTML = skeletonGrid();
+  try {
+    const data = await get(`/search/shows?q=${encodeURIComponent(q)}`);
+    if (seq !== searchSeq) return;
+    searchResults = (data || []).map(r => r.show).filter(Boolean);
+    fillFilter("genre", [...new Set(searchResults.flatMap(s => s.genres || []))].sort());
+    fillFilter("network", [...new Set(searchResults.map(netOf).filter(Boolean))].sort((a, b) => a.localeCompare(b)));
+    paintSearch();
+  } catch (e) { if (seq === searchSeq) body.innerHTML = errBox(e); }
+}
+/* Keeps a <select>'s current value if the new result set still offers it. */
+function fillFilter(id, values) {
+  const sel = document.getElementById(id);
+  const keep = sel.value;
+  sel.innerHTML = `<option value="">All</option>` + values.map(v => `<option>${esc(v)}</option>`).join("");
+  sel.value = values.includes(keep) ? keep : "";
+}
+function paintSearch() {
+  const body = document.getElementById("searchBody");
+  const sort = document.getElementById("sort").value;
+  const genre = document.getElementById("genre").value;
+  const network = document.getElementById("network").value;
+  let list = searchResults.slice();
+  if (genre) list = list.filter(s => (s.genres || []).includes(genre));
+  if (network) list = list.filter(s => netOf(s) === network);
+  if (sort === "rating") list.sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0));
+  if (sort === "newest") list.sort((a, b) => String(b.premiered || "").localeCompare(String(a.premiered || "")));
+  if (sort === "name") list.sort((a, b) => a.name.localeCompare(b.name));
+  document.getElementById("searchSub").textContent =
+    `${list.length} result${list.length === 1 ? "" : "s"}${genre ? " in " + genre : ""}${network ? " on " + network : ""}`;
+  /* /search/shows is hard-capped at 10 matches server-side — ?page= does nothing. */
+  const capped = searchResults.length >= 10
+    ? `<div class="note"><span class="icon">🔎</span><span>TVmaze returns at most <b>10 matches</b> per search,
+       so this isn't the full list — type more of the title to get closer.</span></div>` : "";
+  body.innerHTML = list.length ? capped + `<div class="grid">${list.map(showCard).join("")}</div>`
+    : capped + emptyBox("Nothing matched", "Try a shorter query, or set Genre and Channel back to All.", null, "🙃");
+  syncStars();
+}
+
+/* ============================================================
+   Browse everything: 91k shows, lazy pages + optional full index,
+   rendered through a virtual window so the DOM stays small.
+   ============================================================ */
+const TOTAL_SHOWS = 91242, EST_PAGES = 383, PAGE_SIZE = 240;
+let browseAll = [], browseList = [], browsePage = -1;
+let indexed = false, syncing = false, stopSync = false, syncPages = 0;
+let browseInit = false, savedAt = null, exhausted = false, idbNote = "";
+let browseIds = new Set(), apiExtra = [], apiQuery = "", apiSearching = false, apiError = "";
+
+/* ~194 bytes per record instead of ~1557: the whole index fits in ~17 MB. */
+const slimOf = s => ({
+  i: s.id, n: s.name || "", y: s.premiered ? +String(s.premiered).slice(0, 4) : null,
+  r: (s.rating && s.rating.average) || null, g: s.genres || [], c: netOf(s) || null,
+  m: s.image ? (s.image.medium || s.image.original) : null,
+  st: s.status || null, l: s.language || null, w: s.weight || 0
+});
+const fatten = s => ({ id: s.i, name: s.n, image: s.m ? { medium: s.m } : null, premiered: s.y ? String(s.y) : null, status: s.st });
+
+/* ---- local store (IndexedDB: localStorage caps out around 5 MB) ---- */
+const IDB_NAME = "zapp", IDB_STORE = "shows";
+function idbOpen() {
+  return new Promise((res, rej) => {
+    if (!window.indexedDB) return rej(new Error("IndexedDB unavailable"));
+    const r = indexedDB.open(IDB_NAME, 1);
+    r.onupgradeneeded = () => {
+      const d = r.result;
+      if (!d.objectStoreNames.contains(IDB_STORE)) d.createObjectStore(IDB_STORE);
+    };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error || new Error("IndexedDB blocked"));
+  });
+}
+async function idbPut(key, value) {
+  try {
+    const d = await idbOpen();
+    await new Promise((res, rej) => {
+      const t = d.transaction(IDB_STORE, "readwrite");
+      t.objectStore(IDB_STORE).put(value, key);
+      t.oncomplete = res; t.onerror = () => rej(t.error);
+    });
+    return true;
+  } catch (e) { return false; }
+}
+async function idbGet(key) {
+  try {
+    const d = await idbOpen();
+    return await new Promise((res, rej) => {
+      const t = d.transaction(IDB_STORE, "readonly");
+      const q = t.objectStore(IDB_STORE).get(key);
+      q.onsuccess = () => res(q.result || null); q.onerror = () => rej(q.error);
+    });
+  } catch (e) { return null; }
+}
+async function idbSave(list) {
+  const at = new Date().toISOString().slice(0, 10);
+  const ok = await idbPut("index", { at, list });
+  if (ok) { savedAt = at; idbNote = ""; }
+  else idbNote = "Couldn't save the index locally, so it'll need rebuilding next visit.";
+  return ok;
+}
+const idbLoad = () => idbGet("index");
+
+function initBrowse() {
+  ["bq", "bsort", "bgenre", "blang", "bmin", "bposter"].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener(id === "bq" ? "input" : "change", () => {
+      clearTimeout(initBrowse._t);
+      initBrowse._t = setTimeout(() => {
+        paintBrowse();
+        if (id === "bq") browseApiSearch(document.getElementById("bq").value.trim());
+      }, id === "bq" ? 220 : 0);
+    });
+  });
+  let raf = 0;
+  const onScroll = () => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => { raf = 0; renderBrowseWindow(); });
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+}
+async function openBrowse() {
+  if (browseInit) { paintBrowse(); return; }
+  browseInit = true;
+  document.getElementById("browseBar").innerHTML = `<div class="note"><span class="icon">⏳</span><span>Checking for a stored index…</span></div>`;
+  const cached = await idbLoad();
+  if (cached && Array.isArray(cached.list) && cached.list.length) {
+    browseAll = cached.list; savedAt = cached.at; indexed = true;
+    fillBrowseFilters(); paintBrowse(); paintBrowseBar();
+    return;
+  }
+  await browseLoadMore();
+}
+async function browseLoadMore() {
+  if (syncing || exhausted) return;
+  const next = browsePage + 1;
+  try {
+    const chunk = await get(`/shows?page=${next}`);
+    if (!chunk || !chunk.length) { exhausted = true; }
+    else {
+      browsePage = next;
+      for (const s of chunk) browseAll.push(slimOf(s));
+    }
+  } catch (e) {
+    document.getElementById("browseBar").innerHTML = errBox(e);
+    return;
+  }
+  fillBrowseFilters(); paintBrowse(); paintBrowseBar();
+}
+async function indexEverything() {
+  if (syncing) return;
+  syncing = true; stopSync = false; syncPages = 0; exhausted = false;
+  browseAll = []; browsePage = -1; indexed = false;
+  paintBrowseBar(); paintBrowse();
+  let page = 0;
+  try {
+    for (;;) {
+      if (stopSync) break;
+      const chunk = await request(`/shows?page=${page}`);
+      if (!chunk || !chunk.length) { exhausted = true; break; }
+      for (const s of chunk) browseAll.push(slimOf(s));
+      syncPages = ++page;
+      if (page % 3 === 0) { fillBrowseFilters(); paintBrowse(); }
+      paintBrowseBar();
+      if (page > 500) break;                       // belt and braces
+    }
+    indexed = !stopSync && exhausted;
+    if (indexed) await idbSave(browseAll);
+  } catch (e) {
+    syncing = false;
+    document.getElementById("browseBar").innerHTML = errBox(e);
+    fillBrowseFilters(); paintBrowse();
+    return;
+  }
+  syncing = false;
+  browsePage = Math.max(browsePage, syncPages - 1);
+  fillBrowseFilters(); paintBrowse(); paintBrowseBar();
+}
+function fillBrowseFilters() {
+  browseIds = new Set(browseAll.map(s => s.i));
+  const genres = new Set(), langs = new Set();
+  for (const s of browseAll) {
+    for (const g of s.g) genres.add(g);
+    if (s.l) langs.add(s.l);
+  }
+  for (const [id, set] of [["bgenre", genres], ["blang", langs]]) {
+    const sel = document.getElementById(id), keep = sel.value;
+    const vals = [...set].sort((a, b) => a.localeCompare(b));
+    sel.innerHTML = `<option value="">All</option>` + vals.map(v => `<option>${esc(v)}</option>`).join("");
+    sel.value = vals.includes(keep) ? keep : "";
+  }
+}
+/* The local set is only what you've loaded; this asks TVmaze directly so any
+   query returns something, then merges the hits that aren't already local. */
+async function browseApiSearch(q) {
+  if (q.length < 2) { apiExtra = []; apiQuery = ""; apiError = ""; apiSearching = false; paintBrowse(); return; }
+  if (q === apiQuery && !apiError) return;
+  apiSearching = true; apiError = ""; paintBrowse();
+  try {
+    const data = await get(`/search/shows?q=${encodeURIComponent(q)}`);
+    apiQuery = q;
+    apiExtra = (data || []).map(r => r.show).filter(Boolean).map(slimOf);
+  } catch (e) {
+    apiExtra = []; apiQuery = q; apiError = e.message || "The API search failed.";
+  }
+  apiSearching = false;
+  paintBrowse();
+}
+function paintBrowseBar() {
+  const bar = document.getElementById("browseBar");
+  const n = browseAll.length.toLocaleString();
+  if (syncing) {
+    const pct = Math.min(99, Math.round(syncPages / EST_PAGES * 100));
+    bar.innerHTML = `<div class="note"><span class="icon">⏳</span>
+      <span>Indexing… <b>${syncPages}</b> of ~${EST_PAGES} pages · <b>${n}</b> shows</span>
+      <div class="prog" style="flex:1 1 140px"><div class="track"><div class="fill" style="width:${pct}%"></div></div></div>
+      <button data-stopsync>Stop</button></div>`;
+    return;
+  }
+  if (indexed) {
+    bar.innerHTML = `<div class="note"><span class="icon">📚</span>
+      <span>Full index: <b>${n}</b> shows held locally${savedAt ? ` · saved ${esc(savedAt)}` : ""}.
+      Title filter and sort now cover the whole database.${idbNote ? " " + esc(idbNote) : ""}</span>
+      <button class="alt" data-sync>Rebuild index</button></div>`;
+    return;
+  }
+  bar.innerHTML = `<div class="note"><span class="icon">📚</span>
+    <span>Loaded <b>${n}</b> of <b>${TOTAL_SHOWS.toLocaleString()}</b> shows. Indexing everything takes
+    ~4 minutes (${EST_PAGES} API pages, ~17 MB) and then filtering is instant and offline.</span>
+    <button data-sync>Index everything</button>
+    ${exhausted ? "" : `<button class="alt" data-loadmore>Load next ${PAGE_SIZE}</button>`}</div>`;
+}
+function paintBrowse() {
+  const q = document.getElementById("bq").value.trim().toLowerCase();
+  const genre = document.getElementById("bgenre").value;
+  const lang = document.getElementById("blang").value;
+  const min = +document.getElementById("bmin").value;
+  const poster = document.getElementById("bposter").checked;
+  const sort = document.getElementById("bsort").value;
+
+  /* Merge in API hits for this exact query that aren't in the local set. */
+  let base = browseAll, fromApi = 0;
+  if (q && apiQuery === q.trim() && apiExtra.length) {
+    const extra = apiExtra.filter(s => !browseIds.has(s.i));
+    fromApi = extra.length;
+    if (fromApi) base = browseAll.concat(extra);
+  }
+  let l = base;
+  if (q) l = l.filter(s => s.n.toLowerCase().includes(q));
+  if (genre) l = l.filter(s => s.g.includes(genre));
+  if (lang) l = l.filter(s => s.l === lang);
+  if (min) l = l.filter(s => (s.r || 0) >= min);
+  if (poster) l = l.filter(s => s.m);
+  l = l.slice();
+  if (sort === "popular") l.sort((a, b) => (b.w - a.w) || ((b.r || 0) - (a.r || 0)));
+  if (sort === "rating") l.sort((a, b) => ((b.r || 0) - (a.r || 0)) || (b.w - a.w));
+  if (sort === "newest") l.sort((a, b) => ((b.y || 0) - (a.y || 0)) || (b.w - a.w));
+  if (sort === "name") l.sort((a, b) => a.n.localeCompare(b.n));
+  browseList = l;
+
+  const filtered = q || genre || lang || min || poster;
+  document.getElementById("browseSub").textContent = filtered
+    ? `${l.length.toLocaleString()} match${l.length === 1 ? "" : "es"} of ${browseAll.length.toLocaleString()} loaded`
+      + (fromApi ? ` · ${fromApi} pulled from the API` : "")
+    : indexed
+      ? `All ${browseAll.length.toLocaleString()} shows in TVmaze — virtual-scrolled`
+      : `${browseAll.length.toLocaleString()} shows loaded so far`;
+
+  const note = document.getElementById("browseNote");
+  if (apiSearching) {
+    note.innerHTML = `<div class="note"><span class="icon">🔎</span><span>Asking TVmaze about “<b>${esc(q)}</b>”…</span></div>`;
+  } else if (apiError && q) {
+    note.innerHTML = `<div class="note"><span class="icon">⚠️</span><span>${esc(apiError)}</span></div>`;
+  } else if (q && fromApi) {
+    note.innerHTML = `<div class="note"><span class="icon">🔎</span><span>Added <b>${fromApi}</b>
+      ${fromApi === 1 ? "show" : "shows"} straight from the TVmaze search API for “<b>${esc(q)}</b>”
+      ${indexed ? "" : "— these weren't in the pages you've loaded"}. Its search returns at most 10.</span></div>`;
+  } else if (q && apiQuery === q && !apiExtra.length) {
+    note.innerHTML = `<div class="note"><span class="icon">🔎</span><span>The TVmaze search API found nothing for “<b>${esc(q)}</b>”.</span></div>`;
+  } else note.innerHTML = "";
+
+  renderBrowseWindow();
+}
+function browseLayout() {
+  const grid = document.getElementById("browseGrid");
+  const GAP = 16, MINW = 150, META = 54;
+  const w = grid.clientWidth || (grid.parentElement && grid.parentElement.clientWidth) || 1100;
+  const cols = Math.max(2, Math.floor((w + GAP) / (MINW + GAP)));
+  const colW = Math.max(90, (w - GAP * (cols - 1)) / cols);
+  return { cols, colW, rowH: Math.round(colW * 1.5 + META + GAP), GAP };
+}
+function browseCard(s, left, top, w) {
+  const show = fatten(s);
+  return `<div class="card vcard" style="transform:translate(${Math.round(left)}px,${top}px);width:${Math.round(w)}px">
+    ${starBtn(show)}
+    <button class="poster" data-show-id="${s.i}" aria-label="Open ${esc(s.n)}">
+      ${s.m ? `<img src="${esc(s.m)}" alt="" loading="lazy">` : `<span class="ph">${esc(initials(s.n))}</span>`}
+      ${s.r ? `<span class="rating">★ ${s.r.toFixed(1)}</span>` : ""}
+    </button>
+    <div class="cmeta">
+      <div class="cname">${esc(s.n)}</div>
+      <div class="cline">${s.y || "—"}${s.c ? " · " + esc(s.c) : ""}</div>
+    </div>
+  </div>`;
+}
+/* Only the rows in view are in the DOM — ~60 cards, never 91,242. */
+function renderBrowseWindow() {
+  if (currentView !== "browse") return;
+  const grid = document.getElementById("browseGrid");
+  const spacer = grid.querySelector(".vspacer"), win = grid.querySelector(".vwin");
+  const { cols, colW, rowH, GAP } = browseLayout();
+  const rows = Math.ceil(browseList.length / cols);
+  spacer.style.height = (rows * rowH) + "px";
+  if (!browseList.length) {
+    win.innerHTML = browseAll.length
+      ? emptyBox("Nothing matches", "Loosen the filters, or index everything to search all 91,242 shows.", null, "🙃")
+      : "";
+    return;
+  }
+  const gridTop = grid.getBoundingClientRect().top + (window.scrollY || 0);
+  const scrolled = Math.max(0, (window.scrollY || 0) - gridTop);
+  const firstRow = Math.max(0, Math.floor(scrolled / rowH) - 2);
+  const rowsVisible = Math.ceil((window.innerHeight || 800) / rowH) + 4;
+  const start = firstRow * cols;
+  const end = Math.min(browseList.length, (firstRow + rowsVisible) * cols);
+  let html = "";
+  for (let k = start; k < end; k++) {
+    const row = Math.floor(k / cols), col = k % cols;
+    html += browseCard(browseList[k], col * (colW + GAP), row * rowH, colW);
+  }
+  win.innerHTML = html;
+  syncStars();
+}
+
+/* ---- My shows ---- */
+function initWatchlist() {
+  document.getElementById("wlClear").addEventListener("click", () => {
+    if (!Object.keys(watchlist).length) return;
+    watchlist = {}; store.write("zapp.watchlist", watchlist);
+    paintWlCount(); syncStars(); renderWatchlist();
+  });
+  document.getElementById("wlCopy").addEventListener("click", async e => {
+    const btn = e.currentTarget;
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(Object.keys(watchlist).map(Number)));
+      btn.textContent = "Copied ✓"; setTimeout(() => btn.textContent = "Copy backup", 1500);
+    } catch (err) { btn.textContent = "Copy blocked"; setTimeout(() => btn.textContent = "Copy backup", 1500); }
+  });
+  // Browser dialogs can be blocked, so restore uses an inline field.
+  document.getElementById("wlPaste").addEventListener("click", showRestore);
+}
+function showRestore() {
+  const body = document.getElementById("wlBody");
+  const box = document.createElement("div");
+  box.className = "err";
+  box.style.cssText = "border-color:var(--line);background:var(--panel);margin-bottom:14px";
+  box.innerHTML = `<div style="margin-bottom:9px">Paste a backup (JSON array of show IDs)</div>
+    <div style="display:flex;gap:9px;flex-wrap:wrap">
+      <input id="restoreIn" placeholder="[82,41428,1955]" style="flex:1 1 240px;background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:9px 15px;font-weight:500">
+      <button class="btn primary" id="restoreGo">Restore</button>
+      <button class="btn" id="restoreX">Cancel</button>
+    </div>`;
+  body.prepend(box);
+  document.getElementById("restoreX").onclick = () => box.remove();
+  document.getElementById("restoreGo").onclick = async () => {
+    let ids;
+    try { ids = JSON.parse(document.getElementById("restoreIn").value); } catch (e) { return; }
+    if (!Array.isArray(ids)) return;
+    box.remove();
+    document.getElementById("wlBody").innerHTML = skeletonRows(Math.min(ids.length, 6));
+    const shows = await Promise.all(ids.slice(0, 60).map(id => get(`/shows/${Number(id)}`).catch(() => null)));
+    for (const s of shows) if (s) watchlist[String(s.id)] = {
+      id: s.id, name: s.name, image: s.image ? s.image.medium : null, premiered: s.premiered, status: s.status
+    };
+    store.write("zapp.watchlist", watchlist); paintWlCount(); renderWatchlist();
+  };
+}
+async function renderWatchlist() {
+  const body = document.getElementById("wlBody");
+  const ids = Object.keys(watchlist);
+  document.getElementById("wlSub").textContent = ids.length
+    ? `${ids.length} show${ids.length === 1 ? "" : "s"} · saved in this browser only`
+    : "Saved in this browser only — nothing leaves your machine.";
+  if (!ids.length) {
+    body.innerHTML = emptyBox("No shows yet",
+      "Tap the star on any poster or schedule row to follow a show. Next-episode countdowns land here.", null, "⭐");
+    return;
+  }
+  body.innerHTML = skeletonRows(Math.min(ids.length, 8));
+  const rows = await Promise.all(ids.map(async id => {
+    try { return await get(`/shows/${id}?embed[]=nextepisode`); }
+    catch (e) { return { id: Number(id), name: watchlist[id].name, _failed: true }; }
+  }));
+  rows.sort((a, b) => {
+    const an = a._embedded?.nextepisode?.airdate, bn = b._embedded?.nextepisode?.airdate;
+    if (an && bn) return an.localeCompare(bn);
+    if (an) return -1; if (bn) return 1;
+    return String(a.name).localeCompare(String(b.name));
+  });
+  body.innerHTML = `<div class="wl">` + rows.map(s => {
+    const img = s.image && (s.image.medium || s.image.original);
+    const nx = s._embedded && s._embedded.nextepisode;
+    const n = nx ? daysUntil(nx.airdate) : null;
+    return `<div class="wrow">
+      <button class="thumb" data-show-id="${s.id}" aria-label="Open ${esc(s.name)}">
+        ${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : ""}</button>
+      <button class="mid" style="text-align:left;width:100%" data-show-id="${s.id}">
+        <div class="rtitle">${esc(s.name)}</div>
+        <div class="rsub">${statusTag(s)}${netOf(s) ? `<span class="chip">${esc(netOf(s))}</span>` : ""}
+          ${rate(s) ? `<span class="chip sun">★ ${rate(s)}</span>` : ""}
+          ${(s.genres || []).slice(0, 2).map(g => `<span class="chip">${esc(g)}</span>`).join("")}</div>
+      </button>
+      <div class="next">${nx
+        ? `<span class="cd ${n !== null && n <= 1 ? "soon" : ""}">${esc(countdown(n))}</span>
+           <span class="nx">${esc(epCode(nx))} · ${esc(nx.airdate || "")}</span>`
+        : `<span class="nx">${s.status === "Ended" ? "Series ended" : "No date announced"}</span>`}</div>
+      ${starBtn(s)}
+    </div>`;
+  }).join("") + `</div>`;
+  syncStars();
+}
+
+/* ============================================================
+   5. Detail sheet
+   ============================================================ */
+const scrim = document.getElementById("scrim"), sheet = document.getElementById("sheet");
+let detail = null, lastFocus = null;
+
+async function openShow(id) {
+  lastFocus = document.activeElement;
+  scrim.hidden = false; document.body.style.overflow = "hidden";
+  sheet.innerHTML = `<div style="padding:26px"><div class="sk r" style="height:170px"></div>
+    <div class="sk l" style="width:40%;height:17px"></div><div class="sk l" style="width:75%"></div></div>`;
+  try {
+    const [show, eps, cast] = await Promise.all([
+      get(`/shows/${id}?embed[]=seasons`), get(`/shows/${id}/episodes`), get(`/shows/${id}/cast`)
+    ]);
+    if (!show) throw new Error("That show isn't in TVmaze.");
+    const seasons = (show._embedded && show._embedded.seasons) || [];
+    const nums = [...new Set((eps || []).map(e => e.season))].sort((a, b) => a - b);
+    detail = { show, eps: eps || [], seasons, cast: cast || [], tab: "episodes", season: nums[nums.length - 1] || 1, nums };
+    paintSheet();
+  } catch (e) {
+    sheet.innerHTML = `<div style="padding:26px">${errBox(e)}
+      <button class="btn" style="margin-top:14px" data-close>Close</button></div>`;
+  }
+}
+function closeSheet() {
+  scrim.hidden = true; detail = null; document.body.style.overflow = "";
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+function paintSheet() {
+  const { show, tab } = detail;
+  const img = show.image && (show.image.original || show.image.medium);
+  const r = rate(show);
+  const links = [];
+  if (show.officialSite) links.push(`<a class="btn" href="${esc(show.officialSite)}" target="_blank" rel="noopener">Official site ↗</a>`);
+  if (show.externals && show.externals.imdb) links.push(`<a class="btn" href="https://www.imdb.com/title/${esc(show.externals.imdb)}/" target="_blank" rel="noopener">IMDb ↗</a>`);
+  links.push(`<a class="btn" href="${esc(show.url)}" target="_blank" rel="noopener">TVmaze ↗</a>`);
+
+  sheet.innerHTML = `
+  <div class="hero">
+    ${img ? `<div class="bgimg" style="background-image:url('${esc(img)}')"></div>` : ""}
+    <button class="closex" data-close aria-label="Close">✕</button>
+    <div class="pos">${img ? `<img src="${esc(img)}" alt="Poster for ${esc(show.name)}">` : ""}</div>
+    <div class="hinfo">
+      <h2>${esc(show.name)}</h2>
+      <div class="hmeta">
+        ${statusTag(show)}
+        ${show.premiered ? `<span>${year(show.premiered)}${show.ended ? "–" + year(show.ended) : show.status === "Running" ? "– " : ""}</span>` : ""}
+        ${netOf(show) ? `<span>· ${esc(netOf(show))}</span>` : ""}
+        ${show.runtime || show.averageRuntime ? `<span>· ${show.runtime || show.averageRuntime} min</span>` : ""}
+        ${show.language ? `<span>· ${esc(show.language)}</span>` : ""}
+        ${r ? `<span class="score"><b>${r}</b><span>/10</span></span>` : ""}
+      </div>
+      <div class="chips">${(show.genres || []).map(g => `<span class="chip s">${esc(g)}</span>`).join("")}</div>
+      <p class="summary">${esc(plain(show.summary)) || "No synopsis on file."}</p>
+      <div class="hactions">
+        <button class="btn ${isFollowed(show.id) ? "" : "primary"}" id="followBtn">
+          ${isFollowed(show.id) ? "★ In my shows" : "☆ Add to my shows"}</button>
+        ${links.join("")}
+      </div>
+    </div>
+  </div>
+  <div class="dtabs" role="tablist">
+    <button role="tab" data-tab="episodes" aria-selected="${tab === "episodes"}">Episodes ${detail.eps.length}</button>
+    <button role="tab" data-tab="cast" aria-selected="${tab === "cast"}">Cast ${detail.cast.length}</button>
+  </div>
+  <div class="dbody">${tab === "episodes" ? episodesHTML() : castHTML()}</div>`;
+
+  document.getElementById("followBtn").onclick = () => { toggleFollow(show); paintSheet(); };
+}
+function episodesHTML() {
+  const { show, eps, nums, season } = detail;
+  if (!eps.length) return emptyBox("No episodes listed", "TVmaze has no episode data for this show yet.", null, "🗓");
+  const list = eps.filter(e => e.season === season);
+  const seen = list.filter(e => isSeen(show.id, e.id)).length;
+  const pct = list.length ? Math.round(seen / list.length * 100) : 0;
+  const sMeta = (detail.seasons || []).find(s => s.number === season);
+  return `
+  <div class="seasonbar">
+    <div class="ctl"><label for="seasonSel">Season</label>
+      <select id="seasonSel">${nums.map(n => `<option value="${n}" ${n === season ? "selected" : ""}>Season ${n}</option>`).join("")}</select>
+    </div>
+    ${sMeta && sMeta.premiereDate ? `<span class="chip">${esc(year(sMeta.premiereDate))}${sMeta.endDate ? "–" + year(sMeta.endDate) : ""}</span>` : ""}
+    <div class="prog">
+      <div class="track"><div class="fill" style="width:${pct}%"></div></div>
+      <div class="lbl">${seen} / ${list.length} watched · ${pct}%</div>
+    </div>
+    <button class="btn" id="markSeason">${seen === list.length ? "Unmark season" : "Mark season watched"}</button>
+  </div>
+  <div class="eps">${list.map(e => {
+    const s = isSeen(show.id, e.id);
+    const d = daysUntil(e.airdate);
+    return `<div class="ep${s ? " seen" : ""}" data-ep="${e.id}">
+      <div class="num">${e.number ? String(e.number).padStart(2, "0") : "SP"}</div>
+      <div class="date">${esc(e.airdate || "TBA")}</div>
+      <button class="mid" data-expand="${e.id}">
+        <div class="en">${esc(e.name || "Untitled")}</div>
+        <div class="es">${esc(plain(e.summary)) || "No synopsis for this episode."}</div>
+      </button>
+      <div class="epfoot">
+        ${e.rating && e.rating.average ? `<span class="rt">★ ${e.rating.average.toFixed(1)}</span>` : ""}
+        ${d !== null && d > 0 ? `<span class="tag live">${esc(countdown(d))}</span>` : ""}
+        ${e.runtime ? `<span class="date">${e.runtime}m</span>` : ""}
+        <button class="check" data-seen="${e.id}" aria-label="Mark watched" aria-pressed="${s}">✓</button>
+      </div>
+    </div>`;
+  }).join("")}</div>`;
+}
+function castHTML() {
+  const { cast } = detail;
+  if (!cast.length) return emptyBox("No cast listed", "TVmaze has no cast credits for this show yet.", null, "🎭");
+  return `<div class="cast">${cast.map(c => `<div class="person">
+    <div class="av">${esc(initials(c.person && c.person.name))}</div>
+    <div><div class="nm">${esc(c.person ? c.person.name : "Unknown")}</div>
+      <div class="ch">${esc(c.character ? c.character.name : "")}${c.voice ? " (voice)" : ""}</div></div>
+  </div>`).join("")}</div>`;
+}
+
+/* ============================================================
+   6. Theme
+   ============================================================ */
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  store.write("zapp.theme", t);
+  const b = document.getElementById("themeBtn");
+  if (b) { b.textContent = t === "light" ? "☾" : "☀"; }
+}
+
+/* ============================================================
+   7. Global event wiring
+   ============================================================ */
+document.addEventListener("click", e => {
+  if (e.target.closest("[data-close]")) return closeSheet();
+  if (e.target.closest("#themeBtn"))
+    return applyTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
+
+  const star = e.target.closest("[data-star]");
+  if (star) {
+    e.stopPropagation();
+    let s;
+    try { s = JSON.parse(star.dataset.show); } catch (err) { s = { id: Number(star.dataset.star), name: "" }; }
+    return toggleFollow(s);
+  }
+  const openBtn = e.target.closest("[data-show-id]");
+  if (openBtn) return openShow(openBtn.dataset.showId);
+
+  const navBtn = e.target.closest("#nav button");
+  if (navBtn) return go(navBtn.dataset.view);
+
+  const setW = e.target.closest("[data-setwindow]");
+  if (setW) {
+    document.getElementById("window").value = setW.dataset.setwindow;
+    return applyTodayFilter();
+  }
+  if (e.target.closest("[data-sync]")) return indexEverything();
+  if (e.target.closest("[data-stopsync]")) { stopSync = true; return; }
+  if (e.target.closest("[data-loadmore]")) return browseLoadMore();
+
+  const setC = e.target.closest("[data-setcountry]");
+  if (setC) {
+    const v = setC.dataset.setcountry;
+    document.getElementById("country").value = v;
+    document.getElementById("deep").checked = !!(v && v !== DEFAULT_COUNTRY);
+    return loadSchedule();
+  }
+
+  const sg = e.target.closest("[data-suggest]");
+  if (sg) { setQuery(sg.dataset.suggest); runSearch(sg.dataset.suggest); return; }
+
+  const tabBtn = e.target.closest("[data-tab]");
+  if (tabBtn && detail) { detail.tab = tabBtn.dataset.tab; return paintSheet(); }
+
+  const seenBtn = e.target.closest("[data-seen]");
+  if (seenBtn && detail) { toggleSeen(detail.show.id, Number(seenBtn.dataset.seen)); return paintSheet(); }
+
+  const exp = e.target.closest("[data-expand]");
+  if (exp) { exp.closest(".ep").classList.toggle("open"); return; }
+
+  if (e.target.id === "markSeason" && detail) {
+    const list = detail.eps.filter(x => x.season === detail.season);
+    const all = list.every(x => isSeen(detail.show.id, x.id));
+    const cur = watched[detail.show.id] || [];
+    watched[detail.show.id] = all ? cur.filter(id => !list.some(x => x.id === id))
+      : [...new Set([...cur, ...list.map(x => x.id)])];
+    store.write("zapp.watched", watched);
+    return paintSheet();
+  }
+  if (e.target === scrim) closeSheet();
+});
+document.addEventListener("change", e => {
+  if (e.target.id === "seasonSel" && detail) { detail.season = Number(e.target.value); paintSheet(); }
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !scrim.hidden) return closeSheet();
+  if (e.key === "/" && document.activeElement.tagName !== "INPUT" && scrim.hidden) {
+    e.preventDefault();
+    go("search");
+    const big = document.getElementById("q2");
+    (big.offsetParent !== null ? big : document.getElementById("q")).focus();
+  }
+});
+window.addEventListener("hashchange", () => {
+  const v = location.hash.slice(1);
+  if (["today", "search", "browse", "watchlist"].includes(v) && v !== currentView) go(v);
+});
+
+/* ============================================================
+   8. Boot
+   ============================================================ */
+applyTheme(store.read("zapp.theme", "dark"));
+initToday(); initSearch(); initBrowse(); initWatchlist(); paintWlCount(); paintMeter();
+const start = location.hash.slice(1);
+go(["today", "search", "browse", "watchlist"].includes(start) ? start : "today");
+</script>
+</body>
+</html>

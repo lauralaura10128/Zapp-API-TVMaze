@@ -1,0 +1,13 @@
+{
+  "name": "zapp",
+  "version": "1.0.0",
+  "description": "A single-file TV guide and show browser built on the TVmaze API",
+  "scripts": {
+    "test": "node test/run.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^31.0.1"
+  },
+  "license": "MIT",
+  "private": true
+}
